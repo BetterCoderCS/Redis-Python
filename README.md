@@ -3,8 +3,8 @@
 > 一个用纯 Python 标准库从零实现的 Redis 兼容服务器 —— 包含 RESP 协议、并发连接、过期键、列表与阻塞命令。
 
 <!-- 上传 GitHub 后把 OWNER 替换为你的用户名即可启用徽章 -->
-[![CI](https://github.com/OWNER/mini-redis/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/mini-redis/actions/workflows/ci.yml)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+[![CI](https://github.com/BetterCoderCS/Redis-Python/actions/workflows/ci.yml/badge.svg)](https://github.com/BetterCoderCS/Redis-Python/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/python-3.13%2B-blue)
 ![Dependencies](https://img.shields.io/badge/dependencies-none-green)
 
 这是 [CodeCrafters "Build Your Own Redis"](https://app.codecrafters.io/courses/redis) 挑战的重构版实现。原始版本是单文件练习代码；本项目将其拆分为分层架构、补全类型注解与错误处理，并配上完整的单元 / 集成测试与 CI。
