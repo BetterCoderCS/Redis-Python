@@ -6,6 +6,7 @@
 import socket
 import time
 import unittest
+from typing import ClassVar
 
 from mini_redis.server import RedisServer
 
@@ -78,7 +79,8 @@ GET_FOO = b"*2\r\n$3\r\nGET\r\n$3\r\nfoo\r\n"
 
 
 class TestIntegration(unittest.TestCase):
-    server: RedisServer
+    # 在 setUpClass 中赋值，属于类级共享夹具，而非每个测试实例的字段
+    server: ClassVar[RedisServer]
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -93,6 +95,22 @@ class TestIntegration(unittest.TestCase):
         with Client(self.server.port) as c:
             c.send(PING)
             c.expect(b"+PONG\r\n")
+
+    def test_utf8_payload_round_trip(self) -> None:
+        """中文按 UTF-8 字节原样往返：长度前缀按字节数算，响应不被改写。"""
+        value = "你好".encode("utf-8")
+        self.assertEqual(len(value), 6)
+        echo = (
+            b"*2\r\n$4\r\nECHO\r\n$"
+            + str(len(value)).encode()
+            + b"\r\n"
+            + value
+            + b"\r\n"
+        )
+        expected = b"$6\r\n" + value + b"\r\n"
+        with Client(self.server.port) as c:
+            c.send(echo)
+            c.expect(expected)
 
     def test_protocol_error_returns_error_and_closes_connection(self) -> None:
         with Client(self.server.port) as c:

@@ -21,22 +21,16 @@ class FakeClock:
         self.now += ms
 
 
-class TimeoutFirstEvent:
+class TimeoutFirstEvent(threading.Event):
     """模拟超时先返回，但在 wait 期间唤醒方已经写入 value 的竞态。"""
 
     def __init__(self, on_wait: Callable[[], None]) -> None:
-        self._on_wait = on_wait
-        self._set = False
+        super().__init__()
+        self._on_wait: Callable[[], None] = on_wait
 
-    def wait(self, timeout: float | None = None) -> bool:
+    def wait(self, timeout: float | None = None) -> bool:  # pyright: ignore[reportImplicitOverride]
         self._on_wait()
         return False
-
-    def set(self) -> None:
-        self._set = True
-
-    def is_set(self) -> bool:
-        return self._set
 
 
 class TestNormalizeIndex(unittest.TestCase):
@@ -162,7 +156,7 @@ class TestBlockingList(unittest.TestCase):
             db.rpush(b"l", [b"raced"])
 
         # 超时先返回 False，但唤醒方已经把元素留给了这个等待者
-        waiter.event = TimeoutFirstEvent(push_during_wait)  # type: ignore[assignment]
+        waiter.event = TimeoutFirstEvent(push_during_wait)
         self.assertEqual(db.blpop_wait(b"l", waiter, 0.01), b"raced")
         self.assertIsNone(db.lpop(b"l"))
 

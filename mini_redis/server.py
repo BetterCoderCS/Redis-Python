@@ -22,7 +22,7 @@ ACCEPT_TIMEOUT = 0.2  # 让 stop() 能及时退出 accept 循环
 
 
 def create_server_socket(host: str, port: int) -> socket.socket:
-    """创建监听 socket；Windows/Cygwin 不支持 SO_REUSEPORT 时自动回退。"""
+    """创建监听 socket;Windows/Cygwin 不支持 SO_REUSEPORT 时自动回退。"""
     try:
         return socket.create_server((host, port), reuse_port=True)
     except ValueError:
@@ -141,9 +141,7 @@ class RedisServer:
                 return  # socket 已关闭
             with self._clients_lock:
                 self._clients.add(conn)
-            thread = threading.Thread(
-                target=self._handle, args=(conn,), daemon=True
-            )
+            thread = threading.Thread(target=self._handle, args=(conn,), daemon=True)
             thread.start()
 
     def _handle(self, conn: socket.socket) -> None:

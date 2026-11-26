@@ -48,6 +48,27 @@ OK
 2) "b"
 ```
 
+服务器按字节原样存取，UTF-8 等非 ASCII 内容不会被改写。如果 `redis-cli` 把中文显示为 `"\xe4\xbd\xa0\xe5\xa5\xbd"`，那是 CLI 在 TTY 下对非打印字节做的转义显示，不是服务器返回错了。用 `--raw` 即可直接看到中文：
+
+```bat
+redis-cli --raw echo "你好"
+```
+
+输出：
+
+```
+你好
+```
+
+交互模式同样在启动时加 `--raw`：
+
+```bat
+redis-cli --raw -p 6379
+```
+
+> `--raw` 关闭 CLI 的格式化转义。如果终端代码页不是 UTF-8（可用 `chcp` 查看），
+> 还需先执行 `chcp 65001`，让 cmd 按 UTF-8 解码收到的字节。
+
 ## 运行测试
 
 ```bash
@@ -62,6 +83,9 @@ python -m mypy .
 
 # 吞吐基准（约 1 秒）
 python run_benchmark.py
+
+# 用 redis-cli 做端到端验证（需先安装 Redis 并将 redis-cli 加入 PATH）
+python run_redis_cli_tests.py
 ```
 
 测试共 53 个，分四层：
@@ -72,6 +96,8 @@ python run_benchmark.py
 | `tests/test_storage.py` | 字符串过期、列表语义、BLPOP 唤醒 / 超时 / FIFO 公平性 |
 | `tests/test_commands.py` | 每条命令的精确 RESP 字节输出、错误响应 |
 | `tests/test_integration.py` | 真实 TCP 连接：并发客户端、跨连接 SET/GET、BLPOP 唤醒 |
+
+`run_redis_cli_tests.py` 是供 CodeCrafters 风格验证使用的外部脚本：它在随机端口启动服务器，调用系统里的 `redis-cli --raw` 逐条执行 README 示例命令并断言输出。脚本在找不到 `redis-cli` 时会直接报错退出，不会影响零依赖的 `run_tests.py`。
 
 ---
 
@@ -141,12 +167,12 @@ python run_benchmark.py
 
 ### 性能基准
 
-在 Python 3.13 本地环境单次测量（`python run_benchmark.py`），仅用于量级参考：
+在 Python 3.13 本地环境实测（`python run_benchmark.py`，单次结果，仅供参考）：
 
-| 场景 | 吞吐 |
-|------|------:|
-| 内存 SET + GET | ~1,060,000 ops/s |
-| TCP PING 往返 | ~7,900 req/s |
+| 场景 | 吞吐 | 耗时 |
+|------|------:|-----:|
+| 内存 SET + GET | 1,370,715 ops/s | 0.07s |
+| TCP PING 往返 | 11,516 req/s | 0.43s |
 
 每连接一线程模型并不适合高并发压测，这部分数据主要用来观察实现开销。
 
@@ -169,6 +195,7 @@ redis-python/
 ├── run_server.py
 ├── run_tests.py
 ├── run_benchmark.py
+├── run_redis_cli_tests.py
 └── LICENSE
 ```
 

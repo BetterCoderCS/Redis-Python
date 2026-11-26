@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""一键运行全部测试：python run_tests.py
+"""一键运行全部测试:python run_tests.py
 
-使用标准库 unittest，零第三方依赖；CI 中同样可用 pytest 运行同一套测试。
+使用标准库 unittest,零第三方依赖:CI 中同样可用 pytest 运行同一套测试。
 """
 
 import sys

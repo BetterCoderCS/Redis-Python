@@ -116,7 +116,7 @@ def encode_bulk_string(value: bytes | str | None) -> bytes:
 
 
 def encode_array(items: list[bytes] | None) -> bytes:
-    """编码 bulk string 数组；items 为 None 时返回 null 数组 ``*-1\\r\\n``。"""
+    """编码 bulk string 数组;items 为 None 时返回 null 数组 ``*-1\\r\\n``。"""
     if items is None:
         return ARRAY + b"-1" + CRLF
     out = ARRAY + str(len(items)).encode("ascii") + CRLF
